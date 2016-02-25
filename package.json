@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/footstamps/qa-index/issues"
   },
-  "homepage": "https://github.com/footstamps/qa-index#readme"
+  "homepage": "https://github.com/footstamps/qa-index#readme",
+  "dependencies": {
+    "superagent": "^1.7.2"
+  }
 }
