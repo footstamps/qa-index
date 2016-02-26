@@ -17,6 +17,8 @@
   },
   "homepage": "https://github.com/footstamps/qa-index#readme",
   "dependencies": {
+    "flat": "^2.0.0",
+    "lodash": "^4.5.1",
     "superagent": "^1.7.2"
   }
 }
