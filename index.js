@@ -1,25 +1,53 @@
-// Entry point of data fetching
-const request = require('superagent');
-const path = require('path');
-const url = require('url');
+'use strict';
+// Author: tngan
+//
+// TODO Find an online database server (use question_id as the key)
+// TODO Think about handling time-series data
+// TODO Filter unused data
+// TODO Add the fetching timestamp (For another interesting questions in weekly/festival bias)
 
-const DOMAIN = 'https://api.stackexchange.com';
-const API_VERSION = '2.2';
+//Sample code to use parser
+//parser(res.body.items, 'questions');
 
-// API Url
-const apiUrl = {
-    questions: `${DOMAIN}/${API_VERSION}/questions`
-}; 
+const query = require('./lib/query');
+const parser = require('./lib/parser');
 
-// Simple URL fetching using superagent module
-request
-.get(apiUrl.questions)
-.query('order=desc&sort=activity&site=stackoverflow')
-.set('Accept', 'application/json')
-.end((err,res) => {
-    console.log(res.body);
-    // TODO Find an online database server (use question_id as the key)
-    // TODO Think about handling time-series data
-    // TODO Filter unused data
-    // TODO Add the fetching timestamp (For another interesting questions in weekly/festival bias)
-});
+
+// Generic generator
+// Get all questions in 2014
+function * genericQueryGenerator() { 
+    let startPage = 1;
+    while(true) {
+        // TODO Abstract it out later on
+        // yield query('questions').sort('creation').page(startPage++).pageSize('100').fromDate('1388534400').toDate('1419984000');
+        yield query('questions').sort('creation').page(startPage++).pageSize('100').fromDate('1388534400').toDate('1388540000');
+    }
+}
+
+const questionQueryGenerator = new genericQueryGenerator();
+
+function queryQuestions() {
+    return new Promise(function(resolve, reject) {
+        questionQueryGenerator.next().value.exec((err, res) => {
+            if(res.body.error_id) {
+                // Reject this promise
+                reject(res.body.error_id);
+            } else {
+                resolve(res.body.has_more);
+            }
+        });
+    });
+}
+
+Promise.resolve(true)
+    .then(function loop(hasMore) {
+        if(hasMore) {
+            return queryQuestions().then(loop);
+        }
+    })
+    .then(function() {
+        console.log(`Done ...`);
+    })
+    .catch(function(e) {
+        console.log('error', e);
+    });
