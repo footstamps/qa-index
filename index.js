@@ -11,8 +11,10 @@
 
 const query = require('./lib/query');
 const parser = require('./lib/parser');
+const converter = require('./lib/json2csv');
 
 
+let questions = [];
 // Generic generator
 // Get all questions in 2014
 function * genericQueryGenerator() { 
@@ -36,6 +38,7 @@ function queryQuestions() {
                 // Promise only accept one value, has_more determines whether next page is needed to be fetched
                 // You can get the json for current page using
                 // parser(res.body.items, 'questions')
+                questions = questions.concat(parser(res.body.items, 'questions'));
                 resolve(res.body.has_more);
             }
         });
@@ -49,7 +52,16 @@ Promise.resolve(true)
         }
     })
     .then(function() {
-        console.log(`Done ...`);
+        console.log('Writing into file system...');
+        console.log(questions);
+        console.log('=========');
+        converter.convert(questions, './raw', (err, path) => {
+            if(err) {
+                console.log('Error', err);
+            } else {
+                console.log('Finished ... see the .csv file in under ./raw');
+            }
+        });
     })
     .catch(function(e) {
         console.log('error', e);
