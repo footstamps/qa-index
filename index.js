@@ -33,6 +33,9 @@ function queryQuestions() {
                 // Reject this promise
                 reject(res.body.error_id);
             } else {
+                // Promise only accept one value, has_more determines whether next page is needed to be fetched
+                // You can get the json for current page using
+                // parser(res.body.items, 'questions')
                 resolve(res.body.has_more);
             }
         });
