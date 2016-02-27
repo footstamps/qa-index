@@ -21,6 +21,7 @@ function * genericQueryGenerator() {
     let startPage = 1;
     while(true) {
         // TODO Abstract it out later on
+        console.log(`Fetching page ${startPage} ...`);
         yield query('questions').sort('creation').page(startPage++).pageSize('100').fromDate('1388534400').toDate('1419984000');
         //yield query('questions').sort('creation').page(startPage++).pageSize('100').fromDate('1388534400').toDate('1388540000');
     }
