@@ -15,6 +15,8 @@ const converter = require('./lib/json2csv');
 
 
 let questions = [];
+let page = 1;
+let pagePerFile = 100;
 // Generic generator
 // Get all questions in 2014
 function * genericQueryGenerator() { 
@@ -34,7 +36,7 @@ function queryQuestions() {
         questionQueryGenerator.next().value.exec((err, res) => {
             if(res.body.error_id) {
                 // Reject this promise
-                reject(res.body.error_id);
+                reject(res.body.error_message);
             } else {
                 // Promise only accept one value, has_more determines whether next page is needed to be fetched
                 // You can get the json for current page using
@@ -48,19 +50,23 @@ function queryQuestions() {
 
 Promise.resolve(true)
     .then(function loop(hasMore) {
+        if(page++ % pagePerFile === 0) {
+            converter.convert(questions, './raw', (err, path) => {
+                if(err) {
+                    console.log('Error', err);
+                } else {
+                    console.log(`See the .csv file in under ./raw for page ${page - pagePerFile} - ${ page - 1 }`);
+                }
+            });
+            questions = []; // Restore
+        }
         if(hasMore) {
             return queryQuestions().then(loop);
         }
     })
-    .then(function() {
-        converter.convert(questions, './raw', (err, path) => {
-            if(err) {
-                console.log('Error', err);
-            } else {
-                console.log('Finished ... see the .csv file in under ./raw');
-            }
-        });
-    })
-    .catch(function(e) {
-        console.log('error', e);
-    });
+.then(function() {
+    console.log('Done ...');
+})
+.catch(function(e) {
+    console.log('error', e);
+});
