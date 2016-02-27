@@ -21,8 +21,8 @@ function * genericQueryGenerator() {
     let startPage = 1;
     while(true) {
         // TODO Abstract it out later on
-        // yield query('questions').sort('creation').page(startPage++).pageSize('100').fromDate('1388534400').toDate('1419984000');
-        yield query('questions').sort('creation').page(startPage++).pageSize('100').fromDate('1388534400').toDate('1388540000');
+        yield query('questions').sort('creation').page(startPage++).pageSize('100').fromDate('1388534400').toDate('1419984000');
+        //yield query('questions').sort('creation').page(startPage++).pageSize('100').fromDate('1388534400').toDate('1388540000');
     }
 }
 
@@ -52,9 +52,6 @@ Promise.resolve(true)
         }
     })
     .then(function() {
-        console.log('Writing into file system...');
-        console.log(questions);
-        console.log('=========');
         converter.convert(questions, './raw', (err, path) => {
             if(err) {
                 console.log('Error', err);
