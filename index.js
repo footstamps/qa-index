@@ -25,7 +25,6 @@ function * genericQueryGenerator() {
         // TODO Abstract it out later on
         console.log(`Fetching page ${startPage} ...`);
         yield query('questions').sort('creation').page(startPage++).pageSize('100').fromDate('1388534400').toDate('1419984000');
-        //yield query('questions').sort('creation').page(startPage++).pageSize('100').fromDate('1388534400').toDate('1388540000');
     }
 }
 
@@ -51,7 +50,7 @@ function queryQuestions() {
 Promise.resolve(true)
     .then(function loop(hasMore) {
         if(page++ % pagePerFile === 0) {
-            converter.convert(questions, './raw', (err, path) => {
+            converter.convert(questions.slice(0), './raw', (err, path) => {
                 if(err) {
                     console.log('Error', err);
                 } else {
