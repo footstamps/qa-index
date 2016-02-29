@@ -49,7 +49,7 @@ function queryQuestions() {
 
 Promise.resolve(true)
     .then(function loop(hasMore) {
-        if(page++ % pagePerFile === 0) {
+        if(page++ % pagePerFile === 0 || !hasMore) {
             converter.convert(questions.slice(0), './raw', (err, path) => {
                 if(err) {
                     console.log('Error', err);
