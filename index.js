@@ -16,7 +16,7 @@ const converter = require('./lib/json2csv');
 
 let questions = [];
 let page = 1;
-let pagePerFile = 100;
+let pagePerFile = 50;
 // Generic generator
 // Get all questions in 2014
 function * genericQueryGenerator() { 
@@ -24,7 +24,7 @@ function * genericQueryGenerator() {
     while(true) {
         // TODO Abstract it out later on
         console.log(`Fetching page ${startPage} ...`);
-        yield query('questions').sort('creation').page(startPage++).pageSize('100').fromDate('1388534400').toDate('1419984000');
+        yield query('questions').sort('creation').page(startPage++).tagged('javascript').pageSize('100').fromDate('1393632000').toDate('1396224000'); // 2014-02-01 to 2014-02-28
     }
 }
 
