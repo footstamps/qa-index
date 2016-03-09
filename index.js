@@ -68,12 +68,14 @@ Promise.resolve(true)
 })
 .catch(function(e) {
     console.log('error', e);
-    console.log('Attempt dumping remaining data');
-    converter.convert(questions.slice(0), './raw', (err, path) => {
-                if(err) {
-                    console.log('Error', err);
-                } else {
-                    console.log(`See the .csv file in under ./raw for page ${page - pagePerFile} - ${ page - 1 }`);
-                }
-    });
+    if(questions.length >0){
+        console.log('Attempt dumping remaining data');
+        converter.convert(questions.slice(0), './raw', (err, path) => {
+            if(err) {
+                console.log('Error', err);
+            } else {
+                console.log(`See the .csv file in under ./raw for page ${page - pagePerFile} - ${ page - 1 }`);
+            }
+        });
+    }
 });
