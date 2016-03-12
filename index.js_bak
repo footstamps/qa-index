@@ -13,39 +13,27 @@ const query = require('./lib/query');
 const parser = require('./lib/parser');
 const converter = require('./lib/json2csv');
 const time = require('./lib/timeConverter');
-const _ = require('lodash');
-const fs = require('fs');
-
 
 let questions = [];
 let page = 1;
 let pagePerFile = 50;
 // Generic generator
 // Get all questions in 2014
+var from = time.date_2_timestamp('2014-10-01');
+var to = time.date_2_timestamp('2014-11-01');
 
+from = '1412933289';
+console.log(from);
+console.log(to);
+return;
 
-var config;
-fs.readFile('./config.json', 'utf8', (err, data) => {
-	if(err) throw err;
-	config = JSON.parse(data);
-});
-
-const tag = config.tag;
-const toDate = config.to;
-const isChainDate = _.isDate(config.from) && _.isDate(config.to);
 
 function * genericQueryGenerator() { 
-    
-	const basicQuery = query('questions').sort('creation').tagged(tag).pageSize('100'); // 2014-02-01 to 2014-02-28
+    let startPage = 1;
     while(true) {
         // TODO Abstract it out later on
         console.log(`Fetching page ${startPage} ...`);
-		basicQuery = basicQuery.page(startPage++);
-		if (isChainDate) {
-			yield basicQuery.fromDate(config.from).toDate(config.to);
-		} else {
-			yield basicQuery;
-		}
+        yield query('questions').sort('creation').page(startPage++).tagged('java').pageSize('100').fromDate(from).toDate(to); // 2014-02-01 to 2014-02-28
     }
 }
 
