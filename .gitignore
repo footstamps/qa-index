@@ -1,6 +1,8 @@
 # Logs
 logs
 *.log
+*.bak
+*.js_bak
 *.csv
 npm-debug.log*
 
