@@ -12,7 +12,7 @@
 const query = require('./lib/query');
 const parser = require('./lib/parser');
 const converter = require('./lib/json2csv');
-const time = require('./lib/timeConverter');
+const tLib = require('./lib/timeConverter');
 const _ = require('lodash');
 const fs = require('fs');
 
@@ -25,24 +25,34 @@ let pagePerFile = 50;
 
 
 var config;
-fs.readFile('./config.json', 'utf8', (err, data) => {
-	if(err) throw err;
+try{
+var data = fs.readFileSync('./config.json', 'utf8')
 	config = JSON.parse(data);
-});
+} catch(e){
+	throw e;
+}
 
+var startPage = 1;
+const fromDate = tLib.getTimestamp(config.from);
+const toDate = tLib.getTimestamp(config.to);
+const isChainDate = fromDate && toDate;	//getTimestamp will return 0 if the input value is not valid
 const tag = config.tag;
-const toDate = config.to;
-const isChainDate = _.isDate(config.from) && _.isDate(config.to);
 
+console.log("----- Input Parameter Start -----");
+console.log("Tag: " + tag);
+console.log("From: " + config.from + " (" + fromDate + ")");
+console.log("To: " + config.to + " (" + toDate + ")");
+console.log("----- Input Parameter End -----\n");
 function * genericQueryGenerator() { 
     
-	const basicQuery = query('questions').sort('creation').tagged(tag).pageSize('100'); // 2014-02-01 to 2014-02-28
+	var basicQuery = query('questions').sort('creation').tagged(tag).pageSize('100'); // 2014-02-01 to 2014-02-28
     while(true) {
         // TODO Abstract it out later on
         console.log(`Fetching page ${startPage} ...`);
+		
 		basicQuery = basicQuery.page(startPage++);
 		if (isChainDate) {
-			yield basicQuery.fromDate(config.from).toDate(config.to);
+			yield basicQuery.fromDate(fromDate).toDate(toDate);
 		} else {
 			yield basicQuery;
 		}
