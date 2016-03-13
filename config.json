@@ -1,11 +1,5 @@
-/*Support Date format
-Date: 2014-11-01
-DateTime: 2014-11-01 12:03:07
-Timestamp: 1415016752
-*/
 {
-	"tag": "java",
-	"from": "2014-11-01",
-	"to": "1415016752",
-	"startPage": 1
+	"tag": "python",
+	"from": "2014-4-1",
+	"to": "2014-5-1"
 }
