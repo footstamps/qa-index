@@ -4,7 +4,8 @@
   "description": "A conceptual model for qa system",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "merge": "node ./scripts/mergecsv.js"
   },
   "repository": {
     "type": "git",
