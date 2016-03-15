@@ -5,6 +5,7 @@ logs
 *.js_bak
 *.csv
 *.json
+*.key
 npm-debug.log*
 
 # Runtime data
