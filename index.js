@@ -34,6 +34,7 @@ const isChainDate = fromDate && toDate;	//getTimestamp will return 0 if the inpu
 const tag = config.tag;
 const pageSize = config.pageSize || 100;
 const pagePerFile = config.pagePerFile || 50;
+const key = config.key;
 
 console.log("----- Input Parameter Start -----");
 console.log("Tag: " + tag);
@@ -44,7 +45,11 @@ console.log("Page size: " + config.pageSize);
 console.log("----- Input Parameter End -----\n");
 
 function * genericQueryGenerator(category) { 
-	var basicQuery = query(category).sort('creation').tagged(tag).pageSize(pageSize);
+    let basicQuery = query(category).sort('creation').tagged(tag).pageSize(pageSize);
+    // Add key to the query for stack app (obtain 10K query quota)
+    if(_.isString(key)) {
+        basicQuery = basicQuery.addKey(key);
+    }
     while(true) {
         // TODO Abstract it out later on
         console.log(`Fetching page ${startPage} ...`);
