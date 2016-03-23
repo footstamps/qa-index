@@ -9,7 +9,7 @@ logs
 npm-debug.log*
 *.zip
 
-config.json*
+./config.json
 # Runtime data
 pids
 *.pid
