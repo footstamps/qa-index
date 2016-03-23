@@ -7,7 +7,9 @@ logs
 *.json
 *.key
 npm-debug.log*
+*.zip
 
+config.json*
 # Runtime data
 pids
 *.pid
