@@ -76,8 +76,15 @@ function makeQuery() {
       // Promise only accept one value, has_more determines whether next page is needed to be fetched
       // You can get the json for current page using
       // parser(res.body.items, 'questions')
-      results = results.concat(parser(res.body.items, 'questions'));
-      return resolve(res.body.has_more);
+	  
+      //results = results.concat(parser(res.body.items, 'questions'));
+	  
+	  var ret = {};
+	  ret.has_more =  res.body.has_more;
+	  ret.data = parser(res.body.items, 'questions');
+    //console.dir(res.body.it
+	  return resolve(ret);
+      //return resolve(res.body.has_more);
     });
   });
 }
@@ -96,12 +103,15 @@ Promise
       results = []; // Restore
     }
     if(hasMore) {
-      page+=2;
-      let xPromises = [makeQuery(), makeQuery()];
+      page+=3;
+      let xPromises = [makeQuery(), makeQuery(), makeQuery()];
       Promise
         .all(xPromises)
         .then(res => {
-          loop(res[0] && res[1]);
+          results = results.concat(res[0].data);
+          results = results.concat(res[1].data);
+          results = results.concat(res[2].data);
+          loop(res[0].has_more && res[1].has_more, res[2].has_more);
         });
     }
   })
