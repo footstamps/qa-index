@@ -45,73 +45,79 @@ console.log("Page size: " + config.pageSize);
 console.log("----- Input Parameter End -----\n");
 
 function * genericQueryGenerator(category) { 
-    let basicQuery = query(category).sort('creation').tagged(tag).pageSize(pageSize);
-    // Add key to the query for stack app (obtain 10K query quota)
-    if(_.isString(key)) {
-        basicQuery = basicQuery.addKey(key);
+  let basicQuery = query(category).sort('creation').tagged(tag).pageSize(pageSize);
+  // Add key to the query for stack app (obtain 10K query quota)
+  if(_.isString(key)) {
+    basicQuery = basicQuery.addKey(key);
+  }
+  while(true) {
+    // TODO Abstract it out later on
+    console.log(`Fetching page ${startPage} ...`);
+    basicQuery = basicQuery.page(startPage++);
+    if (isChainDate) {
+      yield basicQuery.fromDate(fromDate).toDate(toDate);
+    } else {
+      yield basicQuery;
     }
-    while(true) {
-        // TODO Abstract it out later on
-        console.log(`Fetching page ${startPage} ...`);
-		basicQuery = basicQuery.page(startPage++);
-		if (isChainDate) {
-			yield basicQuery.fromDate(fromDate).toDate(toDate);
-		} else {
-			yield basicQuery;
-		}
-    }
+  }
 }
 
 const questionQueryGenerator = new genericQueryGenerator('questions');
 const tagQueryGenerator = new genericQueryGenerator('tags');
 
 function makeQuery() {
-    return new Promise(function(resolve, reject) {
-        questionQueryGenerator.next().value.exec((err, res) => {
-            if(res.body.error_id) {
-                // Reject this promise
-                reject(res.body.error_message);
-            } else {
-                // Promise only accept one value, has_more determines whether next page is needed to be fetched
-                // You can get the json for current page using
-                // parser(res.body.items, 'questions')
-                results = results.concat(parser(res.body.items, 'questions'));
-                resolve(res.body.has_more);
-            }
-        });
+  return new Promise(function(resolve, reject) {
+    questionQueryGenerator.next().value.exec((err, res) => {
+      if(res.body.error_id) {
+        // Reject this promise
+        console.log(res.body.error_message);
+        return reject(false);
+      } 
+      // Promise only accept one value, has_more determines whether next page is needed to be fetched
+      // You can get the json for current page using
+      // parser(res.body.items, 'questions')
+      results = results.concat(parser(res.body.items, 'questions'));
+      return resolve(res.body.has_more);
     });
+  });
 }
 
-Promise.resolve(true)
-    .then(function loop(hasMore) {
-        if(page > 0 && (page % pagePerFile === 0 || !hasMore)) {
-            converter.convert(results.slice(0), './raw', (err, path) => {
-                if(err) {
-                    console.log('Error', err);
-                } else {
-                    console.log(`See the .csv file in under ./raw for page ${page - pagePerFile} - ${ page - 1 }`);
-                }
-            });
-            results = []; // Restore
+Promise
+  .resolve(true)
+  .then(function loop(hasMore) {
+    if(page > 0 && (page % pagePerFile === 0 || !hasMore)) {
+      converter.convert(results.slice(0), './raw', (err, path) => {
+        if(err) {
+            console.log('Error', err);
+        } else {
+            console.log(`See the .csv file in under ./raw for page ${page - pagePerFile} - ${ page - 1 }`);
         }
-        if(hasMore) {
-            page++;
-            return makeQuery().then(loop);
-        }
-    })
-.then(function() {
-    console.log('Done ...');
-})
-.catch(function(e) {
-    console.log('error', e);
-    if(results.length >0){
-        console.log('Attempt dumping remaining data');
-        converter.convert(results.slice(0), './raw', (err, path) => {
-            if(err) {
-                console.log('Error', err);
-            } else {
-                console.log(`See the .csv file in under ./raw for page ${page - pagePerFile} - ${ page - 1 }`);
-            }
+      });
+      results = []; // Restore
+    }
+    if(hasMore) {
+      page+=2;
+      let xPromises = [makeQuery(), makeQuery()];
+      Promise
+        .all(xPromises)
+        .then(res => {
+          loop(res[0] && res[1]);
         });
     }
-});
+  })
+  .then(function() {
+    console.log('Done ...');
+  })
+  .catch(function(e) {
+    console.log('error', e);
+    if(results.length >0){
+      console.log('Attempt dumping remaining data');
+      converter.convert(results.slice(0), './raw', (err, path) => {
+        if(err) {
+          console.log('Error', err);
+        } else {
+          console.log(`See the .csv file in under ./raw for page ${page - pagePerFile} - ${ page - 1 }`);
+        }
+      });
+    }
+  });
