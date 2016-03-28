@@ -33,8 +33,8 @@ const toDate = tLib.getTimestamp(config.to);
 const isChainDate = fromDate && toDate;	//getTimestamp will return 0 if the input value is not valid
 const tag = config.tag;
 const pageSize = config.pageSize || 100;
-const pagePerFile = config.pagePerFile || 50;
-const pagePerTick = config.pagePerTick || 10; //The number of makeQuery() per tick
+const pagePerFile = config.pagePerFile || 100;
+const pagePerTick = config.pagePerTick || 25; //The number of makeQuery() per tick
 const key = config.key;
 
 console.log("----- Input Parameter Start -----");
