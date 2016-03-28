@@ -25,6 +25,6 @@
     "mkdirp": "^0.5.1",
     "q": "^1.4.1",
     "superagent": "^1.7.2",
-    "word-count": "^0.2.1"
+    "wordcount": "^1.1.1"
   }
 }
