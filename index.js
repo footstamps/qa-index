@@ -114,11 +114,12 @@ Promise
         .then(res => {
           let flgHasMore = true;
           for(var i=0;i<pagePerTick;i++){
+            results = results.concat(res[i].data);
             if(!res[i].has_more) {
               flgHasMore = false;
               throw "No more data";
             }
-            results = results.concat(res[i].data);
+            
           }
           loop(flgHasMore);
         })
