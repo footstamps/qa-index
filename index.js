@@ -34,6 +34,7 @@ const isChainDate = fromDate && toDate;	//getTimestamp will return 0 if the inpu
 const tag = config.tag;
 const pageSize = config.pageSize || 100;
 const pagePerFile = config.pagePerFile || 50;
+const pagePerTick = config.pagePerTick || 10; //The number of makeQuery() per tick
 const key = config.key;
 
 console.log("----- Input Parameter Start -----");
@@ -103,31 +104,37 @@ Promise
       results = []; // Restore
     }
     if(hasMore) {
-      page+=3;
-      let xPromises = [makeQuery(), makeQuery(), makeQuery()];
+      page+=pagePerTick;
+      let xPromises = [];
+      for(var i=0;i<pagePerTick;i++){
+        xPromises.push(makeQuery());
+      }
       Promise
         .all(xPromises)
         .then(res => {
-          results = results.concat(res[0].data);
-          results = results.concat(res[1].data);
-          results = results.concat(res[2].data);
-          loop(res[0].has_more && res[1].has_more, res[2].has_more);
+          let flgHasMore = true;
+          for(var i=0;i<pagePerTick;i++){
+            if(!res[i].has_more) {
+              flgHasMore = false;
+              throw "No more data";
+            }
+            results = results.concat(res[i].data);
+          }
+          loop(flgHasMore);
+        })
+        .catch((err) => {
+          console.log('Error', err);
+          if(results.length > 0) {
+            console.log('Attempt dumping remaining data');
+            converter.convert(results.slice(0), './raw', (err, path) => {
+              if(err) {
+                console.log('Error', err);
+              } else {
+                console.log(`See the .csv file in under ./raw for page ${page - pagePerFile} - ${ page - 1 }`);
+              }
+            });
+          }
         });
     }
-  })
-  .then(function() {
-    console.log('Done ...');
-  })
-  .catch(function(e) {
-    console.log('error', e);
-    if(results.length >0){
-      console.log('Attempt dumping remaining data');
-      converter.convert(results.slice(0), './raw', (err, path) => {
-        if(err) {
-          console.log('Error', err);
-        } else {
-          console.log(`See the .csv file in under ./raw for page ${page - pagePerFile} - ${ page - 1 }`);
-        }
-      });
-    }
   });
+
